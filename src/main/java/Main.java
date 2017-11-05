@@ -1,6 +1,7 @@
 package main.java;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import edu.wpi.first.wpilibj.networktables.*;
 import edu.wpi.first.wpilibj.tables.*;
@@ -13,19 +14,26 @@ import org.opencv.imgproc.Imgproc;
 
 public class Main {
 	//Defined Variables
-	ArrayList<MatOfPoint> CONTOURS = new ArrayList<MatOfPoint>();
+	ArrayList<MatOfPoint> G_Contours = new ArrayList<MatOfPoint>();
+	ArrayList<MatOfPoint> S_Contours = new ArrayList<MatOfPoint>();
 	//Image Converters
 	CvSink GearSink = new CvSink("Gear Grabber");
 	CvSink ShootSink = new CvSink("Shoot Grabber");
 	CvSource GearSource = new CvSource("Gear Source",VideoMode.PixelFormat.kMJPEG,640,480,30);
 	CvSource ShootSource = new CvSource("Shoot Source",VideoMode.PixelFormat.kMJPEG,640,480,30);
 	//Image Constants
-	Mat BINARY = new Mat();
-	Mat	CLUSTERS = new Mat();
-	Mat HEIRARCHY = new Mat();
-	Mat	HSV = new Mat();
-	Mat	SOURCE = new Mat();
-	Mat	THRESH = new Mat();
+	Mat S_BINARY = new Mat();
+	Mat	S_CLUSTERS = new Mat();
+	Mat S_HEIRARCHY = new Mat();
+	Mat	S_HSV = new Mat();
+	Mat	S_SOURCE = new Mat();
+	Mat	S_THRESH = new Mat();
+	Mat G_BINARY = new Mat();
+	Mat	G_CLUSTERS = new Mat();
+	Mat G_HEIRARCHY = new Mat();
+	Mat	G_HSV = new Mat();
+	Mat	G_SOURCE = new Mat();
+	Mat	G_THRESH = new Mat();
 	//Stream Variables
 	MjpegServer GearStream = new MjpegServer("MJPEG Server", 1184);
 	MjpegServer GearStreamAlt = new MjpegServer("MJPEG Server", 1185);
@@ -55,7 +63,9 @@ public class Main {
 	    NetworkTable.setTeam(2509);
 	    NetworkTable.initialize();
 		GearCam.setResolution(640, 480);
+		
 		ShootCam.setResolution(640, 480);
+		ShootCam.setBrightness(0);
 		GearSink.setSource(GearCam);
 		ShootSink.setSource(ShootCam);
 		GearStream.setSource(GearSource);
@@ -73,7 +83,31 @@ public class Main {
 		
 	});
 	private Thread ProcessShooter = new Thread(()->{
-		
+		while(true){
+			S_Contours.clear();
+			ShootSink.grabFrame(S_SOURCE);
+			Imgproc.cvtColor(S_SOURCE, S_HSV, Imgproc.COLOR_BGR2RGB);
+			Imgproc.threshold(S_HSV, S_BINARY, 180, 190, Imgproc.THRESH_BINARY_INV);	
+			Imgproc.cvtColor(S_BINARY, S_THRESH, Imgproc.COLOR_HSV2BGR);
+			Imgproc.cvtColor(S_THRESH, S_CLUSTERS, Imgproc.COLOR_BGR2GRAY);
+			Mat S_GRAY = S_CLUSTERS;
+			Imgproc.Canny(S_GRAY, S_HEIRARCHY, 2, 4);
+			Imgproc.findContours(S_HEIRARCHY, S_Contours, new Mat(),Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+	        for(MatOfPoint mop :S_Contours){
+	        	Rect rec = Imgproc.boundingRect(mop);
+	        	Imgproc.rectangle(S_SOURCE, rec.br(), rec.tl(), Red);
+	        }
+	        for(Iterator<MatOfPoint> iterator = S_Contours.iterator();iterator.hasNext();){
+				MatOfPoint matOfPoint = (MatOfPoint) iterator.next();
+				Rect rec = Imgproc.boundingRect(matOfPoint);
+				//float aspect = (float)rec.width/(float)rec.height;
+				if( rec.height < 8||rec.height>25){
+					iterator.remove();
+					continue;
+				}
+			}
+	        NetworkTalbe.
+		}
 	});
 	
 }
