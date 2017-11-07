@@ -45,7 +45,7 @@ public class Main {
 	Scalar Green = new Scalar(0,255,0);
 	Scalar Red = new Scalar(0,0,255);
 	Scalar Yellow = new Scalar(255,255,0);
-	NetworkTable table = NetworkTable.getTable(null);
+	NetworkTable table = NetworkTable.getTable("vision");
 	//Camera Variable
 	UsbCamera GearCam = setUsbCamera(0, GearStream);
 	UsbCamera ShootCam = setUsbCamera(1,ShootStream);
@@ -63,7 +63,7 @@ public class Main {
 	    NetworkTable.setTeam(2509);
 	    NetworkTable.initialize();
 		GearCam.setResolution(640, 480);
-		
+		GearCam.setBrightness(0);
 		ShootCam.setResolution(640, 480);
 		ShootCam.setBrightness(0);
 		GearSink.setSource(GearCam);
@@ -101,12 +101,16 @@ public class Main {
 				MatOfPoint matOfPoint = (MatOfPoint) iterator.next();
 				Rect rec = Imgproc.boundingRect(matOfPoint);
 				//float aspect = (float)rec.width/(float)rec.height;
-				if( rec.height < 8||rec.height>25){
+				if( rec.height < 20||rec.height>100){
 					iterator.remove();
 					continue;
 				}
+		        
 			}
-	        NetworkTalbe.
+	        table.putNumber("Shoot Height", ShootTarget.height);
+	        table.putNumber("Shoot Width", ShootTarget.width);
+	        table.putNumber("Shoot X", ShootTarget.x);
+	        table.putNumber("Shoot Y", ShootTarget.y);
 		}
 	});
 	

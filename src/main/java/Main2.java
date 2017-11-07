@@ -15,8 +15,8 @@ public class Main2 {
 		// Loads our OpenCV library. This MUST be included
 		System.loadLibrary("opencv_java310");
 		NetworkTable.setClientMode();
-    NetworkTable.setTeam(2509);
-    NetworkTable.initialize();
+		NetworkTable.setTeam(2509);
+		NetworkTable.initialize();
 
 
     // This is the network port you want to stream the raw received image to
